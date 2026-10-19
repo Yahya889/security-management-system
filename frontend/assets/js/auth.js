@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const successMessage = document.getElementById('successMessage');
             
             // إخفاء الرسائل السابقة
+            api.clearToken();
+            sessionStorage.removeItem('employee');
             errorMessage.hidden = true;
             successMessage.hidden = true;
             

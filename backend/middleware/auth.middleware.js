@@ -3,15 +3,15 @@ const pool = require('../config/database');
 
 async function authMiddleware(req, res, next) {
   const authorization = req.get('authorization') || '';
-  const [scheme, token] = authorization.split(' ');
-
-  if (scheme !== 'Bearer' || !token) {
+  const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+  if (!token || /\s/.test(token)) {
     return res.status(401).json({ success: false, message: 'يلزم تسجيل الدخول' });
   }
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
-    if (!/^\d+$/.test(payload.sub || '') || typeof payload.jti !== 'string') {
+    if (!/^\d+$/.test(payload.sub || '') || typeof payload.jti !== 'string' ||
+        !Number.isInteger(payload.exp)) {
       return res.status(401).json({ success: false, message: 'جلسة الدخول غير صالحة' });
     }
     const [revoked] = await pool.execute(

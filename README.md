@@ -5,16 +5,22 @@
 ## التشغيل
 
 1. ثبّت Node.js 16.9 أو أحدث وMySQL، ثم ثبّت الاعتماديات باستخدام `npm install`.
-2. أنشئ قاعدة البيانات والجداول عبر تشغيل `/database/schema.sql` على MySQL.
+2. أنشئ قاعدة البيانات والجداول عبر تشغيل `database/schema.sql` من مجلد المشروع على MySQL.
 3. أنشئ ملف `.env` في جذر المشروع، واضبط `DB_HOST` و`DB_USER` و`DB_PASSWORD` و`DB_NAME` و`DB_PORT`، إضافة إلى `JWT_SECRET` عشوائي بطول 32 حرفاً على الأقل. لا تستخدم قيمة افتراضية أو ترفع الملف إلى Git.
-4. أضف حساب مسؤول إلى جدول `employees` بدور `مدير` وحالة `نشط`. يجب أن تكون كلمة المرور مجزأة بـ bcrypt؛ أنشئ التجزئة محلياً باستخدام المكتبة `bcryptjs` المثبتة، ولا تستخدم كلمات المرور أو التجزئات الوهمية في `database/seed-data.sql`.
-5. شغّل `npm start` وافتح `http://localhost:3000`. للدليل الصحي استخدم `/api/health`.
+4. استخدم حساب MySQL مخصصاً بصلاحيات على قاعدة بيانات التطبيق فقط، ولا تستخدم حساب `root` لتشغيل التطبيق.
+5. أضف حساب مسؤول إلى جدول `employees` بدور `مدير` وحالة `نشط`. يجب أن تكون كلمة المرور مجزأة بـ bcrypt؛ أنشئ التجزئة محلياً باستخدام المكتبة `bcryptjs` المثبتة، ولا تستخدم كلمات المرور أو التجزئات الوهمية في `database/seed-data.sql`.
+6. شغّل `npm start` وافتح `http://localhost:3000`. للدليل الصحي استخدم `/api/health`.
 
-مثال لتوليد تجزئة كلمة مرور تفاعلياً بعد تثبيت الاعتماديات:
+مثال آمن نسبياً لتوليد تجزئة كلمة مرور دون إظهارها على الشاشة أو وضعها في سجل الأوامر:
 
 ```sh
-node -e "const r=require('readline').createInterface({input:process.stdin,output:process.stdout});r.question('Password: ',async p=>{console.log(await require('bcryptjs').hash(p,12));r.close()})"
+read -s -p "Password: " PASSWORD; echo
+export PASSWORD
+node -e "require('bcryptjs').hash(process.env.PASSWORD,12).then(console.log)"
+unset PASSWORD
 ```
+
+استخدم HTTPS في النشر الفعلي، مع إبقاء قاعدة البيانات غير مكشوفة للإنترنت.
 
 صفحات الإدارة وواجهات API محمية بدور مدير. إعدادات المظهر والأقسام تحفظ في قاعدة البيانات؛ تقارير الموظفين تعرض بيانات وظيفية غير حساسة وتسمح بالتصفية حسب القسم والحالة.
 

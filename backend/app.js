@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const pool = require('./config/database');
 const authRoutes = require('./routes/auth.routes');
 const managementRoutes = require('./routes/management.routes');
 
@@ -17,7 +18,14 @@ app.use(morgan('combined'));
 app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
 
 app.get('/', (req, res) => res.redirect('/frontend/pages/login.html'));
-app.get('/api/health', (req, res) => res.json({ success: true }));
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    return res.json({ success: true });
+  } catch (error) {
+    return res.status(503).json({ success: false, message: 'قاعدة البيانات غير متاحة' });
+  }
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', managementRoutes);
 app.use((req, res) => res.status(404).json({ success: false, message: 'المسار غير موجود' }));
