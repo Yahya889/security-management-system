@@ -1,0 +1,31 @@
+:root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #1f2937;
+    background: #f3f6fa;
+    font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; min-height: 100vh; }
+
+button, input, select { font: inherit; }
+
+.btn, .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 16px;
+    background: #2463a7;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn:hover, .button:hover { filter: brightness(.93); }
+.btn-full { width: 100%; }
+.secondary { background: #536273; }
+.error-message { color: #a32020; margin-top: 12px; }
+.success-message { color: #176b39; margin-top: 12px; }

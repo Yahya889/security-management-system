@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة النظام</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body class="admin-page">
+    <header class="topbar">
+        <div>
+            <h1 id="organizationTitle">إدارة النظام</h1>
+            <p id="welcomeMessage">إعدادات وأقسام وتقارير الموظفين</p>
+        </div>
+        <button id="logoutButton" class="button secondary" type="button">تسجيل الخروج</button>
+    </header>
+
+    <main class="admin-content">
+        <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
+
+        <section class="panel" aria-labelledby="settingsHeading">
+            <h2 id="settingsHeading">تخصيص النظام</h2>
+            <form id="settingsForm" class="form-grid">
+                <label>اسم المنشأة
+                    <input id="organizationName" name="organization_name" maxlength="100" required>
+                </label>
+                <label>لون الواجهة
+                    <select id="theme" name="theme">
+                        <option value="blue">أزرق</option>
+                        <option value="green">أخضر</option>
+                        <option value="dark">داكن</option>
+                    </select>
+                </label>
+                <label>الخلفية
+                    <select id="background" name="background">
+                        <option value="gradient">متدرجة</option>
+                        <option value="light">فاتحة</option>
+                        <option value="dark">داكنة</option>
+                    </select>
+                </label>
+                <button class="button" type="submit">حفظ المظهر</button>
+            </form>
+        </section>
+
+        <section class="panel" aria-labelledby="departmentsHeading">
+            <h2 id="departmentsHeading">إدارة الأقسام</h2>
+            <form id="departmentForm" class="inline-form">
+                <label for="departmentName">اسم القسم</label>
+                <input id="departmentName" maxlength="100" required>
+                <button class="button" type="submit">إضافة قسم</button>
+            </form>
+            <ul id="departmentList" class="department-list"></ul>
+        </section>
+
+        <section class="panel" aria-labelledby="reportHeading">
+            <h2 id="reportHeading">تقرير الموظفين</h2>
+            <form id="reportForm" class="form-grid">
+                <label>الحالة
+                    <select id="reportStatus">
+                        <option value="">كل الحالات</option>
+                        <option value="نشط">نشط</option>
+                        <option value="إجازة">إجازة</option>
+                        <option value="منتهي_الخدمة">منتهي الخدمة</option>
+                    </select>
+                </label>
+                <label>القسم
+                    <select id="reportDepartment">
+                        <option value="">كل الأقسام</option>
+                    </select>
+                </label>
+                <button class="button" type="submit">عرض التقرير</button>
+            </form>
+            <p id="reportCount" aria-live="polite"></p>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>الرقم الوظيفي</th>
+                        <th>الاسم</th>
+                        <th>المسمى الوظيفي</th>
+                        <th>القسم</th>
+                        <th>الدور</th>
+                        <th>الحالة</th>
+                        <th>تاريخ التعيين</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reportRows"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="panel note">
+            <h2>تكامل الكاميرات</h2>
+            <p>لم يتم تفعيل عرض أو تحكم بالكاميرات. يتطلب ذلك تحديد نوع الأجهزة أو منصة إدارة الفيديو، ثم إعداد الربط والصلاحيات على نحو آمن.</p>
+        </aside>
+    </main>
+
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/admin.js"></script>
+</body>
+</html>

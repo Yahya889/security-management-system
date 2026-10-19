@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { randomUUID } = require('crypto');
 const pool = require('../config/database');
 const { authMiddleware } = require('../middleware/auth.middleware');
 
@@ -27,6 +28,7 @@ router.post('/login', async (req, res, next) => {
 
     const token = jwt.sign({}, process.env.JWT_SECRET, {
       algorithm: 'HS256',
+      jwtid: randomUUID(),
       subject: String(employee.id),
       expiresIn: '8h'
     });
@@ -48,6 +50,19 @@ router.post('/login', async (req, res, next) => {
 
 router.get('/me', authMiddleware, (req, res) => {
   res.json({ success: true, employee: req.employee });
+});
+
+router.post('/logout', authMiddleware, async (req, res, next) => {
+  try {
+    await pool.execute('DELETE FROM revoked_tokens WHERE expires_at < CURRENT_TIMESTAMP');
+    await pool.execute(
+      'INSERT INTO revoked_tokens (token_id, expires_at) VALUES (?, ?)',
+      [req.tokenId, new Date(req.tokenExpiry * 1000)]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

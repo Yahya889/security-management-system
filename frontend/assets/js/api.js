@@ -51,6 +51,7 @@ class APIClient {
     }
 
     getCurrentUser() { return this.get('/auth/me'); }
+    logout() { return this.post('/auth/logout', {}); }
     getAdminSettings() { return this.get('/admin/settings'); }
     saveAdminSettings(settings) { return this.put('/admin/settings', settings); }
     getDepartments() { return this.get('/admin/departments'); }

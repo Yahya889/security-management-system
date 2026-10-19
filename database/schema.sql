@@ -177,6 +177,12 @@ CREATE TABLE IF NOT EXISTS departments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+    token_id CHAR(36) PRIMARY KEY,
+    expires_at TIMESTAMP NOT NULL,
+    INDEX idx_revoked_tokens_expiry (expires_at)
+);
+
 -- Create Indexes
 CREATE INDEX idx_employees_role ON employees(role);
 CREATE INDEX idx_employees_status ON employees(status);

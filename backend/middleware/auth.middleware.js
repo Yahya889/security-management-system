@@ -11,6 +11,13 @@ async function authMiddleware(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    const [revoked] = await pool.execute(
+      'SELECT token_id FROM revoked_tokens WHERE token_id = ? LIMIT 1',
+      [payload.jti]
+    );
+    if (revoked.length) {
+      return res.status(401).json({ success: false, message: 'جلسة الدخول غير صالحة' });
+    }
     const [employees] = await pool.execute(
       'SELECT id, employee_id, full_name, role, status FROM employees WHERE id = ? LIMIT 1',
       [payload.sub]
@@ -22,6 +29,8 @@ async function authMiddleware(req, res, next) {
     }
 
     req.employee = employee;
+    req.tokenId = payload.jti;
+    req.tokenExpiry = payload.exp;
     return next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
