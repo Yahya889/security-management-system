@@ -11,6 +11,9 @@ async function authMiddleware(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    if (!/^\d+$/.test(payload.sub || '') || typeof payload.jti !== 'string') {
+      return res.status(401).json({ success: false, message: 'جلسة الدخول غير صالحة' });
+    }
     const [revoked] = await pool.execute(
       'SELECT token_id FROM revoked_tokens WHERE token_id = ? LIMIT 1',
       [payload.jti]

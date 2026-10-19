@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const successMessage = document.getElementById('successMessage');
             
             // إخفاء الرسائل السابقة
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
+            errorMessage.hidden = true;
+            successMessage.hidden = true;
             
             try {
                 const response = await api.login(employee_id, password);
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.success) {
                     if (response.employee.role !== 'مدير') {
                         errorMessage.textContent = 'هذه النسخة متاحة لمدير النظام فقط';
-                        errorMessage.style.display = 'block';
+                        errorMessage.hidden = false;
                         return;
                     }
                     // تخزين التوكن
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // عرض رسالة النجاح
                     successMessage.textContent = 'جاري التوجيه...';
-                    successMessage.style.display = 'block';
+                    successMessage.hidden = false;
                     
                     // الانتظار قليلاً ثم التوجيه
                     setTimeout(() => {
@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 400);
                 } else {
                     errorMessage.textContent = response.message || 'خطأ في تسجيل الدخول';
-                    errorMessage.style.display = 'block';
+                    errorMessage.hidden = false;
                 }
             } catch (error) {
                 console.error('Login error:', error);
                 errorMessage.textContent = 'حدث خطأ في الاتصال';
-                errorMessage.style.display = 'block';
+                errorMessage.hidden = false;
             }
         });
     }

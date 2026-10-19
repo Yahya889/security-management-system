@@ -8,8 +8,9 @@ const { authMiddleware } = require('../middleware/auth.middleware');
 const router = express.Router();
 
 router.post('/login', async (req, res, next) => {
-  const employeeId = typeof req.body.employee_id === 'string' ? req.body.employee_id.trim() : '';
-  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  const body = req.body || {};
+  const employeeId = typeof body.employee_id === 'string' ? body.employee_id.trim() : '';
+  const password = typeof body.password === 'string' ? body.password : '';
   if (!employeeId || !password || employeeId.length > 100 || password.length > 200) {
     return res.status(400).json({ success: false, message: 'أدخل بيانات دخول صحيحة' });
   }
@@ -17,8 +18,9 @@ router.post('/login', async (req, res, next) => {
   try {
     const [employees] = await pool.execute(
       `SELECT id, employee_id, full_name, email, role, status, password
-       FROM employees WHERE employee_id = ? OR email = ? LIMIT 1`,
-      [employeeId, employeeId]
+       FROM employees WHERE employee_id = ? OR email = ?
+       ORDER BY (employee_id = ?) DESC LIMIT 1`,
+      [employeeId, employeeId, employeeId]
     );
     const employee = employees[0];
 

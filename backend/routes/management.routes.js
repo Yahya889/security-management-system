@@ -60,7 +60,7 @@ router.get('/departments', async (req, res, next) => {
 });
 
 router.post('/departments', async (req, res, next) => {
-  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+  const name = typeof (req.body || {}).name === 'string' ? req.body.name.trim() : '';
   if (!name || name.length > 100) {
     return res.status(400).json({ success: false, message: 'اسم القسم مطلوب وبحد أقصى 100 حرف' });
   }
@@ -77,8 +77,9 @@ router.post('/departments', async (req, res, next) => {
 
 router.put('/departments/:id', async (req, res, next) => {
   const id = Number(req.params.id);
-  const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
-  const active = req.body.active;
+  const body = req.body || {};
+  const name = typeof body.name === 'string' ? body.name.trim() : '';
+  const active = body.active;
   if (!Number.isSafeInteger(id) || id < 1 || !name || name.length > 100 ||
       (active !== undefined && typeof active !== 'boolean')) {
     return res.status(400).json({ success: false, message: 'بيانات القسم غير صالحة' });

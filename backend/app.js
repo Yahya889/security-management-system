@@ -22,8 +22,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', managementRoutes);
 app.use((req, res) => res.status(404).json({ success: false, message: 'المسار غير موجود' }));
 app.use((error, req, res, next) => {
+  if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
+    return res.status(400).json({ success: false, message: 'صيغة الطلب غير صالحة' });
+  }
   console.error(error);
-  res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
 });
 
 if (require.main === module) {
