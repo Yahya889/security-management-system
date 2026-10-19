@@ -78,11 +78,16 @@ router.post('/departments', async (req, res, next) => {
 router.put('/departments/:id', async (req, res, next) => {
   const id = Number(req.params.id);
   const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
-  if (!Number.isSafeInteger(id) || id < 1 || !name || name.length > 100) {
+  const active = req.body.active;
+  if (!Number.isSafeInteger(id) || id < 1 || !name || name.length > 100 ||
+      (active !== undefined && typeof active !== 'boolean')) {
     return res.status(400).json({ success: false, message: 'بيانات القسم غير صالحة' });
   }
   try {
-    const [result] = await pool.execute('UPDATE departments SET name = ? WHERE id = ?', [name, id]);
+    const [result] = await pool.execute(
+      'UPDATE departments SET name = ?, active = COALESCE(?, active) WHERE id = ?',
+      [name, active === undefined ? null : active, id]
+    );
     if (!result.affectedRows) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
     return res.json({ success: true, message: 'تم تحديث القسم' });
   } catch (error) {

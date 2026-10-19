@@ -163,6 +163,20 @@ CREATE TABLE IF NOT EXISTS vehicle_maintenance (
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
 );
 
+-- Configurable system settings and department catalog
+CREATE TABLE IF NOT EXISTS system_settings (
+    setting_key VARCHAR(50) PRIMARY KEY,
+    setting_value VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS departments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create Indexes
 CREATE INDEX idx_employees_role ON employees(role);
 CREATE INDEX idx_employees_status ON employees(status);
