@@ -19,6 +19,26 @@
     <main class="admin-content">
         <div id="pageMessage" class="message" role="status" aria-live="polite"></div>
 
+        <section class="panel" aria-labelledby="assistantHeading">
+            <h2 id="assistantHeading">مساعد المسؤول</h2>
+            <p>اكتب أمراً مباشراً لتنفيذ إجراء مدعوم، أو سجّل طلباً جديداً للمراجعة. لا تكتب كلمات مرور أو أرقام هويات أو بيانات سرية.</p>
+            <ul class="assistant-examples">
+                <li>أضف قسم الدعم الفني</li>
+                <li>غيّر لون الواجهة إلى أخضر</li>
+                <li>غيّر الخلفية إلى فاتحة</li>
+                <li>غيّر اسم المنشأة إلى شركة الأمن</li>
+                <li>اعرض تقرير الموظفين</li>
+            </ul>
+            <form id="assistantForm" class="inline-form">
+                <label for="assistantInput">طلبك</label>
+                <input id="assistantInput" maxlength="500" autocomplete="off" required>
+                <button class="button" type="submit">إرسال</button>
+            </form>
+            <p id="assistantResult" class="assistant-result" role="status" aria-live="polite"></p>
+            <h3>الطلبات غير المدعومة — بانتظار مراجعة المسؤول</h3>
+            <ul id="assistantRequests" class="request-list"></ul>
+        </section>
+
         <section class="panel" aria-labelledby="settingsHeading">
             <h2 id="settingsHeading">تخصيص النظام</h2>
             <form id="settingsForm" class="form-grid">

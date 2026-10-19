@@ -57,6 +57,11 @@ class APIClient {
     getDepartments() { return this.get('/admin/departments'); }
     createDepartment(name) { return this.post('/admin/departments', { name }); }
     updateDepartment(id, data) { return this.put(`/admin/departments/${id}`, data); }
+    submitAssistantRequest(text) { return this.post('/admin/assistant/requests', { text }); }
+    getAssistantRequests() { return this.get('/admin/assistant/requests'); }
+    reviewAssistantRequest(id, status) {
+        return this.request('PATCH', `/admin/assistant/requests/${id}`, { status });
+    }
 
     getEmployeeReport(filters = {}) {
         const query = new URLSearchParams(filters);

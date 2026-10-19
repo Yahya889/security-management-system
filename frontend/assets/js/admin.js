@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('theme').value = settings.theme;
         document.getElementById('background').value = settings.background;
         applyAppearance(settings);
-        await Promise.all([loadDepartments(), loadReport()]);
+        await Promise.all([loadDepartments(), loadReport(), loadAssistantRequests()]);
     } catch (error) {
         tell(error.message || 'تعذر تحميل بيانات النظام', true);
     }
@@ -69,6 +69,76 @@ document.addEventListener('DOMContentLoaded', async () => {
             tell(error.message || 'تعذر تحميل التقرير', true);
         }
     });
+
+    document.getElementById('assistantForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const input = document.getElementById('assistantInput');
+        const resultElement = document.getElementById('assistantResult');
+        resultElement.textContent = 'جارٍ تنفيذ الطلب أو تسجيله...';
+        const result = await api.submitAssistantRequest(input.value.trim());
+        if (!result.success) {
+            resultElement.textContent = result.message || 'تعذر تنفيذ الطلب';
+            return;
+        }
+        resultElement.textContent = result.request.result_message;
+        input.value = '';
+        if (result.request.status === 'نفذ') {
+            if (/قسم/u.test(result.request.request_text)) await loadDepartments();
+            if (/لون|خلفية|اسم المنشأة/u.test(result.request.request_text)) {
+                const refreshedSettings = await api.getAdminSettings();
+                if (refreshedSettings.success) {
+                    document.getElementById('organizationName').value = refreshedSettings.settings.organization_name;
+                    document.getElementById('theme').value = refreshedSettings.settings.theme;
+                    document.getElementById('background').value = refreshedSettings.settings.background;
+                    applyAppearance(refreshedSettings.settings);
+                }
+            }
+        }
+        await loadAssistantRequests();
+    });
+
+    async function loadAssistantRequests() {
+        const result = await api.getAssistantRequests();
+        if (!result.success) throw new Error(result.message);
+        const list = document.getElementById('assistantRequests');
+        list.replaceChildren();
+        const pending = result.requests.filter((request) => request.status === 'بانتظار_المراجعة');
+        if (!pending.length) {
+            const empty = document.createElement('li');
+            empty.textContent = 'لا توجد طلبات بانتظار المراجعة.';
+            list.append(empty);
+            return;
+        }
+        pending.forEach((request) => {
+            const item = document.createElement('li');
+            const text = document.createElement('span');
+            text.className = 'request-text';
+            text.textContent = request.request_text;
+            const meta = document.createElement('span');
+            meta.className = 'request-meta';
+            meta.textContent = new Date(request.created_at).toLocaleString('ar');
+            const reviewed = document.createElement('button');
+            reviewed.type = 'button';
+            reviewed.className = 'button secondary';
+            reviewed.textContent = 'تمت المراجعة';
+            reviewed.addEventListener('click', async () => {
+                const response = await api.reviewAssistantRequest(request.id, 'تمت_المراجعة');
+                if (!response.success) return tell(response.message, true);
+                await loadAssistantRequests();
+            });
+            const rejected = document.createElement('button');
+            rejected.type = 'button';
+            rejected.className = 'button secondary';
+            rejected.textContent = 'رفض';
+            rejected.addEventListener('click', async () => {
+                const response = await api.reviewAssistantRequest(request.id, 'مرفوض');
+                if (!response.success) return tell(response.message, true);
+                await loadAssistantRequests();
+            });
+            item.append(text, meta, reviewed, rejected);
+            list.append(item);
+        });
+    }
 
     async function loadDepartments() {
         const result = await api.getDepartments();

@@ -45,6 +45,13 @@
 .department-list li span { flex: 1; }
 .department-list .button { padding: 7px 11px; }
 .department-list .muted { color: #718096; }
+.assistant-examples { padding-right: 22px; line-height: 1.8; }
+.assistant-result { min-height: 1.5em; }
+.request-list { list-style: none; padding: 0; }
+.request-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border-top: 1px solid #e2e8f0; padding: 12px 2px; }
+.request-list .request-text { flex: 1 1 250px; }
+.request-list .request-meta { color: #718096; font-size: .9rem; }
+.request-list .button { padding: 7px 11px; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; }
 th, td { text-align: right; padding: 10px; border-bottom: 1px solid #e2e8f0; }
