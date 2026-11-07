@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نموذج استلام وتسليم - الدورية / البوابة</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Tahoma,Arial,sans-serif;margin:0;background:#f1f4f8;color:#1b2430}
+header{background:#12355b;color:#fff;padding:14px 16px;text-align:center}
+header h1{margin:0;font-size:1.15rem}
+main{max-width:820px;margin:0 auto;padding:12px}
+.tabs{display:flex;gap:8px;margin-bottom:10px}
+.tabs button{flex:1;padding:12px;border:0;border-radius:8px;background:#d5dde8;font-size:1rem;cursor:pointer}
+.tabs button.on{background:#12355b;color:#fff}
+section{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px #0002}
+section h2{margin:0 0 10px;font-size:1rem;color:#12355b;border-bottom:2px solid #e3e9f1;padding-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:.85rem;margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #b9c4d2;border-radius:6px;font:inherit}
+textarea{min-height:60px}
+.chk{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eef1f5;flex-wrap:wrap}
+.chk b{flex:1;min-width:140px;font-weight:600}
+.chk label{display:inline-flex;gap:4px;margin:0;align-items:center}
+.chk input[type=radio]{width:auto}
+.chk input.note{flex-basis:100%;display:none}
+.chk.bad input.note{display:block}
+canvas{width:100%;height:130px;border:1px dashed #6b7c93;border-radius:6px;background:#fafcff;touch-action:none}
+.sig .btns{margin-top:4px}
+button.s{padding:6px 12px;border:0;border-radius:6px;background:#e3e9f1;cursor:pointer}
+.act{display:flex;gap:8px;flex-wrap:wrap}
+.act button{flex:1;min-width:130px;padding:12px;border:0;border-radius:8px;font-size:1rem;cursor:pointer;background:#12355b;color:#fff}
+.act button.alt{background:#2e7d4f}.act button.warn{background:#b3541e}
+.flow{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.flow li{padding:6px 10px;border-radius:14px;background:#e3e9f1;font-size:.8rem}
+.flow li.done{background:#2e7d4f;color:#fff}.flow li.cur{background:#f0a500;font-weight:700}
+.msg{padding:10px;border-radius:8px;background:#fff7e0;margin-bottom:10px;font-size:.9rem}
+.lock{opacity:.6;pointer-events:none}
+@media print{header,.tabs,.act,.btns,.msg{display:none}body{background:#fff}section{box-shadow:none;border:1px solid #999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><h1>نموذج استلام وتسليم <span id="ttl">الدورية</span> — NEW MURABBA</h1></header>
+<main>
+<div class="tabs">
+  <button id="tp" class="on">🚓 الدورية</button>
+  <button id="tg">🚧 البوابة</button>
+</div>
+<div class="msg" id="msg"></div>
+
+<section><h2>مراحل سير العمل</h2><ol class="flow" id="flow"></ol></section>
+
+<form id="f" autocomplete="off">
+<section id="s-main"><h2>بيانات الاستلام والتسليم</h2>
+<div class="grid">
+  <div><label>المنطقة</label><input name="zone"></div>
+  <div><label>الوردية</label><select name="shift"><option>A</option><option>B</option><option>C</option></select></div>
+  <div><label>التاريخ</label><input type="date" name="date"></div>
+  <div><label>الوقت</label><input type="time" name="time"></div>
+  <div><label>البوابة</label><input name="gate"></div>
+  <div><label>اسم المُسلّم</label><input name="giver"></div>
+  <div><label>اسم المُستلم</label><input name="receiver"></div>
+  <div class="p"><label>رقم الدورية</label><input name="patrol_no"></div>
+  <div class="p"><label>العداد قبل</label><input type="number" name="odo_before"></div>
+  <div class="p"><label>العداد بعد</label><input type="number" name="odo_after"></div>
+  <div class="p"><label>الوقود</label><select name="fuel"><option>25%</option><option>50%</option><option>75%</option><option>100%</option></select></div>
+</div></section>
+
+<section><h2>قائمة الفحص <small>(× = ملاحظة موثقة)</small></h2><div id="list"></div>
+<div id="addrow" style="margin-top:10px;display:flex;gap:6px"><input id="newItem" placeholder="بند إضافي (اختياري)"><button type="button" class="s" id="addItem" style="white-space:nowrap">＋ إضافة بند</button></div></section>
+
+<section><h2>الملاحظات</h2><textarea name="notes" placeholder="اكتب «لا يوجد» إذا لم توجد ملاحظات"></textarea></section>
+
+<section class="sig" data-role="giver"><h2>توقيع المُسلّم</h2><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></section>
+<section class="sig" data-role="receiver"><h2>توقيع المُستلم (إقرار بالاستلام)</h2><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></section>
+
+<section id="recvBox" class="g"><h2>مستلمون إضافيون</h2><div id="recvList"></div>
+<button type="button" class="s" id="addRecv">＋ إضافة مستلم</button></section>
+
+<section class="p stage" data-stage="maintenance"><h2>ملحق: فحص الصيانة</h2>
+<div class="grid">
+  <div><label>اسم مسؤول الصيانة</label><input name="m_name"></div>
+  <div><label>تاريخ الفحص</label><input type="date" name="m_date"></div>
+  <div><label>النتيجة</label><select name="m_result"><option>جاهزة للعمل</option><option>غير جاهزة</option></select></div>
+  <div><label>الأعطال</label><input name="m_faults" value="لا يوجد أعطال"></div>
+</div>
+<div class="sig" data-role="maintenance"><label>توقيع الصيانة</label><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></div>
+</section>
+
+<section class="stage" data-stage="supervisor"><h2>مراجعة مشرف الوردية</h2>
+<div class="grid"><div><label>اسم المشرف</label><input name="sup_name"></div></div>
+<label>ملاحظات المشرف</label><textarea name="sup_notes"></textarea>
+<div class="sig" data-role="supervisor"><label>توقيع المشرف</label><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></div>
+</section>
+
+<section class="stage" data-stage="manager"><h2>مراجعة مدير الأمن</h2>
+<div class="grid"><div><label>الاسم</label><input name="mg_name"></div></div>
+<label>ملاحظات المدير</label><textarea name="mg_notes"></textarea>
+<div class="sig" data-role="manager"><label>توقيع المدير</label><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></div>
+</section>
+
+<section class="stage" data-stage="ops"><h2>مركز العمليات</h2>
+<label>تأكيد الاستلام / تسجيل الملاحظات في سجل الأحداث</label><textarea name="ops_notes"></textarea>
+</section>
+</form>
+
+<div class="act">
+  <button id="next" class="alt">اعتماد وإحالة للمرحلة التالية ◀</button>
+  <button id="link">🔗 نسخ رابط المرحلة التالية</button>
+  <button id="wa">📲 إرسال واتساب</button>
+  <button id="pdf">🖨 طباعة / PDF</button>
+  <button id="rst" class="warn">نموذج جديد</button>
+</div>
+<p style="font-size:.75rem;color:#667">توقيعات مرسومة؛ لا تتضمن تحققًا إلكترونيًا من الهوية. يُحفظ النموذج على الجهاز ويُنقل عبر الرابط.</p>
+</main>
+
+<script>
+const ITEMS={
+ patrol:['حالة المركبة','الإطارات - الإطار الاحتياطي','جهاز برافو','شاحن جهاز برافو','الداش كام','الأنارة','السجلات','نظافة المركبة','وثيقة التأمين'],
+ gate:['غرفة الحراسة','الكهرباء','التكييف','الإضاءات','كاميرات المراقبة','جهاز برافو','شواحن الأجهزة','التقارير','السجلات','نظافة غرفة الحراسة','مياه الشرب','دورة المياه','مياه الغسيل','سجل دورة المياه','نظافة دورة المياه']
+};
+const STAGES={
+ patrol:[['draft','تعبئة المسلّم'],['receive','توقيع المستلم'],['maintenance','فحص الصيانة'],['supervisor','مشرف الوردية'],['manager','مدير الأمن'],['ops','مركز العمليات'],['archived','مؤرشف']],
+ gate:[['draft','تعبئة المسلّم'],['receive','توقيع المستلم'],['supervisor','مشرف الوردية'],['manager','مدير الأمن'],['ops','مركز العمليات'],['archived','مؤرشف']]
+};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let S={type:'patrol',stage:'draft',data:{},sigs:{},checks:{},log:[],extra:[],nrecv:0};
+const items=()=>ITEMS[S.type].concat(S.extra||[]);
+const f=$('#f');
+$('#addItem').onclick=()=>{const v=$('#newItem').value.trim();if(!v||S.stage!=='draft')return;collect();(S.extra=S.extra||[]).push(v);$('#newItem').value='';buildList();render();};
+
+function stages(){return STAGES[S.type]}
+function idx(){return stages().findIndex(x=>x[0]===S.stage)}
+
+function buildList(){
+  $('#list').innerHTML=items().map((t,i)=>`<div class="chk" data-i="${i}"><b>${t}</b>
+  <label><input type="radio" name="c${i}" value="ok"> ✓ سليم</label>
+  <label><input type="radio" name="c${i}" value="bad"> × ملاحظة</label>
+  <input class="note" placeholder="وصف الملاحظة" data-n="${i}"></div>`).join('');
+  $$('.chk').forEach(r=>r.onchange=()=>{r.classList.toggle('bad',r.querySelector('[value=bad]').checked);});
+}
+
+function buildRecv(){
+  $('#recvList').innerHTML=Array.from({length:S.nrecv||0},(_,i)=>`<div class="sig" data-role="recv${i}" style="margin-bottom:10px"><label>اسم المستلم ${i+2}</label><input name="recv_name${i}"><canvas></canvas><div class="btns"><button type="button" class="s clr">مسح</button></div></div>`).join('');
+  $$('#recvList .clr').forEach(bindClr);
+}
+$('#addRecv').onclick=()=>{if(S.stage!=='draft'&&S.stage!=='receive')return;collect();S.nrecv=(S.nrecv||0)+1;render();};
+function render(){
+  buildRecv();
+  $('#recvBox').style.display=S.type==='gate'?'':'none';
+  $('#recvBox').classList.toggle('lock',S.stage!=='draft'&&S.stage!=='receive');
+  $('#ttl').textContent=S.type==='patrol'?'الدورية':'البوابة';
+  $('#tp').classList.toggle('on',S.type==='patrol');$('#tg').classList.toggle('on',S.type==='gate');
+  $$('.p').forEach(e=>e.style.display=S.type==='patrol'?'':'none');
+  $('#flow').innerHTML=stages().map((x,i)=>`<li class="${i<idx()?'done':i===idx()?'cur':''}">${x[1]}</li>`).join('');
+  const cur=S.stage;
+  // الأقسام النشطة حسب المرحلة
+  $('#s-main').classList.toggle('lock',cur!=='draft');
+  $('#list').parentElement.classList.toggle('lock',cur!=='draft');
+  $$('.sig[data-role=giver]').forEach(e=>e.classList.toggle('lock',cur!=='draft'));
+  $$('.sig[data-role=receiver]').forEach(e=>e.classList.toggle('lock',cur!=='receive'));
+  $$('.stage').forEach(e=>{const st=e.dataset.stage;e.classList.toggle('lock',st!==cur);
+    e.style.display=(st==='maintenance'&&S.type!=='patrol')?'none':'';});
+  $('#msg').textContent=cur==='archived'?'✅ اكتمل النموذج وتمت أرشفته.':'المرحلة الحالية: '+stages()[idx()][1]+' — بعد الاعتماد انسخ الرابط أو أرسله عبر واتساب للمسؤول التالي.';
+  $('#next').style.display=cur==='archived'?'none':'';
+  Object.entries(S.data).forEach(([k,v])=>{if(f.elements[k])f.elements[k].value=v});
+  items().forEach((_,i)=>{const v=S.checks[i];if(!v)return;
+    const r=document.querySelector(`[name=c${i}][value=${v.v}]`);if(r)r.checked=true;
+    const n=document.querySelector(`[data-n="${i}"]`);n.value=v.n||'';
+    r&&r.closest('.chk').classList.toggle('bad',v.v==='bad');});
+  $$('canvas').forEach(c=>{const role=c.closest('.sig').dataset.role;setup(c);
+    if(S.sigs[role]){const im=new Image();im.onload=()=>c.getContext('2d').drawImage(im,0,0,c.width,c.height);im.src=S.sigs[role];}});
+}
+
+function setup(c){
+  const r=c.getBoundingClientRect();c.width=r.width||300;c.height=130;
+  const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.lineWidth=2;x.lineCap='round';x.strokeStyle='#111';
+  let d=false;c.dirty=false;
+  const p=e=>{const b=c.getBoundingClientRect();return [(e.clientX-b.left)*c.width/b.width,(e.clientY-b.top)*c.height/b.height]};
+  c.onpointerdown=e=>{d=true;c.dirty=true;c.setPointerCapture(e.pointerId);x.beginPath();x.moveTo(...p(e))};
+  c.onpointermove=e=>{if(!d)return;x.lineTo(...p(e));x.stroke()};
+  c.onpointerup=c.onpointercancel=()=>d=false;
+}
+function bindClr(b){b.onclick=()=>{const c=b.closest('.sig').querySelector('canvas');setup(c);delete S.sigs[b.closest('.sig').dataset.role]}}
+$$('.clr').forEach(bindClr);
+
+function collect(){
+  new FormData(f).forEach((v,k)=>{if(!/^c\d+$/.test(k))S.data[k]=v});
+  items().forEach((_,i)=>{const r=document.querySelector(`[name=c${i}]:checked`);
+    if(r)S.checks[i]={v:r.value,n:document.querySelector(`[data-n="${i}"]`).value};});
+  $$('.sig').forEach(s=>{const c=s.querySelector('canvas');if(c.dirty)S.sigs[s.dataset.role]=c.toDataURL('image/png');});
+}
+function save(){localStorage.setItem('handover',JSON.stringify(S))}
+
+function validate(){
+  const cur=S.stage,need=[];
+  if(cur==='draft'){
+    ['giver','receiver','date','time'].forEach(k=>{if(!S.data[k])need.push(k==='giver'?'اسم المسلّم':k==='receiver'?'اسم المستلم':k==='date'?'التاريخ':'الوقت')});
+    if(S.type==='patrol'&&!S.data.patrol_no)need.push('رقم الدورية');
+    items().forEach((t,i)=>{const c=S.checks[i];if(!c)need.push(t);else if(c.v==='bad'&&!c.n)need.push('وصف ملاحظة: '+t)});
+    if(!S.data.notes)need.push('الملاحظات (اكتب لا يوجد)');
+    if(!S.sigs.giver)need.push('توقيع المسلّم');
+  }
+  if(cur==='receive'){if(!S.sigs.receiver)need.push('توقيع المستلم');
+    for(let i=0;i<(S.nrecv||0);i++)if(!S.data['recv_name'+i]||!S.sigs['recv'+i])need.push('اسم وتوقيع المستلم '+(i+2));}
+  if(cur==='maintenance'&&(!S.data.m_name||!S.sigs.maintenance))need.push('اسم وتوقيع الصيانة');
+  if(cur==='supervisor'&&(!S.data.sup_name||!S.sigs.supervisor))need.push('اسم وتوقيع المشرف');
+  if(cur==='manager'&&(!S.data.mg_name||!S.sigs.manager))need.push('اسم وتوقيع المدير');
+  return need;
+}
+
+$('#next').onclick=()=>{
+  collect();const need=validate();
+  if(need.length){alert('أكمل الحقول التالية:\n- '+need.join('\n- '));return}
+  S.log.push({stage:S.stage,at:new Date().toISOString()});
+  S.stage=stages()[idx()+1][0];save();render();window.scrollTo(0,0);
+};
+
+function encode(){collect();return btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function decode(h){return JSON.parse(decodeURIComponent(escape(atob(h))))}
+function url(){return location.origin+location.pathname+'#'+encode()}
+$('#link').onclick=async()=>{const u=url();try{await navigator.clipboard.writeText(u);alert('تم نسخ الرابط')}catch{prompt('انسخ الرابط:',u)}};
+$('#wa').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent('نموذج استلام وتسليم - '+(S.type==='patrol'?'دورية':'بوابة')+'\n'+url()));
+$('#pdf').onclick=()=>{collect();window.print()};
+$('#rst').onclick=()=>{if(confirm('بدء نموذج جديد؟ سيتم تفريغ الحقول الحالية.')){localStorage.removeItem('handover');location.hash='';location.reload()}};
+function sw(t){collect();if(S.stage!=='draft'){alert('لا يمكن تغيير النوع بعد البدء');return}
+  S={type:t,stage:'draft',data:S.data,sigs:{},checks:{},log:[],extra:[],nrecv:0};buildList();render();}
+$('#tp').onclick=()=>sw('patrol');$('#tg').onclick=()=>sw('gate');
+
+try{
+  if(location.hash.length>1)S=decode(location.hash.slice(1));
+  else if(localStorage.getItem('handover'))S=JSON.parse(localStorage.getItem('handover'));
+}catch(e){}
+buildList();render();
+if(!S.data.date){f.elements.date.value=new Date().toISOString().slice(0,10)}
+window.addEventListener('resize',()=>{});
+</script>
+</body>
+</html>
